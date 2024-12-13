@@ -1,21 +1,70 @@
-<!-- Image and text -->
- <template>
-    <nav class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand cave-stone" href="#">
+<template>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand cave-stone" href="#">
         <img src="../assets/logo3.png" width="64" height="64" class="d-inline-block align-center" alt="">
         Rock Share
-        </a>
-    </nav>
- </template>
+      </a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Features</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Pricing</a>
+          </li>
+        </ul>
+        <div class="d-flex align-items-center">
+          <div v-if="user">
+            <span class="me-2"><strong>{{ user.name }}</strong></span>
+            <span class="text-muted">({{ user.email }})</span>
+          </div>
+          <button class="btn btn-outline-primary ms-3" @click="logout">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+</template>
+
+<script>
+export default {
+  name: "NavBar",
+  props: {
+    user: {
+      type: Object,
+      required: true,
+    },
+  },
+  methods: {
+    logout() {
+      alert("Logging out...");
+      // Lógica de logout pode ser adicionada aqui
+    },
+  },
+};
+</script>
 
 <style scoped>
 .navbar {
-    margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
 .cave-stone {
   font-family: cave-stone, sans-serif;
   font-size: 28px;
-  color: #f5f5f5;
+  color: #050505;
 }
 </style>

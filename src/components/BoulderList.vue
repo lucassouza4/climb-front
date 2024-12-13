@@ -5,8 +5,15 @@
         <h1 class="h3 mb-4">Boulder Rank</h1>
         <nav class="navbar navbar-light bg-light">
           <form class="form-inline">
-            <input class="form-control mr-sm-2" type="search" placeholder="Buscar boulder" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0 btn-lg" type="submit">Buscar</button>
+            <input
+              class="form-control mr-sm-2"
+              type="search"
+              placeholder="Buscar boulder"
+              aria-label="Search"
+            />
+            <button class="btn btn-outline-success my-2 my-sm-0 btn-lg" type="submit">
+              Buscar
+            </button>
           </form>
         </nav>
         <div v-if="loading" class="text-center py-4">
@@ -29,18 +36,15 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(boulder,index) in boulders" :key="boulder.id">
-                <td>{{ index+1 }}</td>
+              <tr v-for="(boulder, index) in boulders" :key="boulder.id">
+                <td>{{ index + 1 }}</td>
                 <td>{{ boulder.name }}</td>
                 <td>{{ boulder.city }}</td>
                 <td>{{ boulder.sector }}</td>
                 <td>V{{ boulder.difficulty }}</td>
                 <td>{{ boulder.ascents }}</td>
                 <td>
-                  <button 
-                    type="button" 
-                    class="btn btn-outline-info" 
-                    @click="showModal(boulder)">
+                  <button type="button" class="btn btn-outline-info" @click="showModal(boulder)">
                     Info
                   </button>
                 </td>
@@ -52,7 +56,13 @@
     </div>
 
     <!-- Modal -->
-    <div v-if="isModalVisible" class="modal fade show d-block" tabindex="-1" aria-labelledby="boulderModalLabel" aria-hidden="true">
+    <div
+      v-if="isModalVisible"
+      class="modal fade show d-block"
+      tabindex="-1"
+      aria-labelledby="boulderModalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -75,48 +85,68 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, defineProps } from 'vue';
+<script lang="ts">
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+import type { Boulder } from '@/types/boulder'
 
-const boulders = ref([]);
-const loading = ref(true);
-const error = ref(null);
-const selectedBoulder = ref(null);
-const isModalVisible = ref(false);
+export default {
+  name: 'BoulderList',
+  props: {
+    url: {
+      type: String,
+      required: true,
+    },
+  },
+  setup(props) {
+    const boulders = ref<Boulder[]>([])
+    const loading = ref(true)
+    const error = ref<string | null>(null)
+    const selectedBoulder = ref<Boulder | null>(null)
+    const isModalVisible = ref(false)
 
-const props = defineProps(['url']);
-
-const fetchBoulders = async () => {
-  try {
-    const response = await fetch(`${props.url}/boulders/`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch boulders');
+    const fetchBoulders = async () => {
+      try {
+        const response = await axios.get(`${props.url}/boulders/`)
+        boulders.value = response.data.boulders
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data?.message || 'An error occurred while fetching boulders.'
+        } else {
+          error.value = 'An unexpected error occurred.'
+        }
+      } finally {
+        loading.value = false
+      }
     }
-    const data = await response.json();
-    boulders.value = data.boulders;
-    loading.value = false;
-  } catch (err) {
-    error.value = err.message;
-    loading.value = false;
-  }
-};
 
-const showModal = (boulder) => {
-  selectedBoulder.value = boulder;
-  isModalVisible.value = true;
-};
+    const showModal = (boulder: Boulder) => {
+      selectedBoulder.value = boulder
+      isModalVisible.value = true
+    }
 
-const hideModal = () => {
-  isModalVisible.value = false;
-};
+    const hideModal = () => {
+      isModalVisible.value = false
+    }
 
-onMounted(() => {
-  fetchBoulders();
-});
+    onMounted(fetchBoulders)
+
+    return {
+      boulders,
+      loading,
+      error,
+      selectedBoulder,
+      isModalVisible,
+      showModal,
+      hideModal,
+    }
+  },
+}
 </script>
 
 <style scoped>
-.table th, .table td {
+.table th,
+.table td {
   padding: 0.5rem;
 }
 .form-inline {

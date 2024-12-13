@@ -1,34 +1,49 @@
-<template>
-  <NavBar :user="user" />
-  <HomePage :url="API_URL"/>
-</template>
-
-<script setup lang="ts">
+<script lang="ts">
+import { RouterView } from 'vue-router'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
-const API_URL = import.meta.env.VITE_API_URL;
+import NavBar from './components/NavBar.vue'
+import { onMounted, ref } from 'vue'
+import axios from 'axios'
+import type { User } from './types/user'
 
-import HomePage from './pages/HomePage.vue';
-import { ref, onMounted } from 'vue';
-import NavBar from './components/NavBar.vue';
+export default {
+  name: 'app',
+  setup() {
+    const API_URL = import.meta.env.VITE_API_URL
+    const user = ref<User>({ id: 0, name: '', email: '', permissions: [] })
+    const error = ref<string | null>(null)
 
-const user = ref(null);
-
-const fetchUser = async () => {
-  try {
-    const response = await fetch(`${API_URL}/users/?email=4iTrinta@gmail.com`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch user');
+    const fetchUser = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/users/?email=4iTrinta@gmail.com`)
+        user.value = response.data
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          error.value = err.response?.data?.message || 'An error occurred while fetching boulders.'
+        } else {
+          error.value = 'An unexpected error occurred.'
+        }
+      }
     }
-    const data = await response.json();
-    user.value = data;
-  } catch (err) {
-    error.value = err.message;
-  }
-};
 
-onMounted(() => {
-  fetchUser();
-});
+    onMounted(fetchUser)
+
+    return {
+      user,
+      API_URL,
+    }
+  },
+  components: {
+    NavBar,
+    RouterView,
+  },
+}
 </script>
 
+<template>
+  <div id="app">
+    <NavBar :user="user" />
+    <RouterView :url="API_URL" />
+  </div>
+</template>

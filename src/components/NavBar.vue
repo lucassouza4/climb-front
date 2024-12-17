@@ -80,6 +80,7 @@ export default {
     },
     removeFromStore() {
       localStorage.removeItem('user')
+      localStorage.removeItem('token')
     },
   },
 }

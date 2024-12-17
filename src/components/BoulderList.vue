@@ -17,7 +17,7 @@
           </form>
         </nav>
         <div v-if="loading" class="text-center py-4">
-          <p class="text-muted">Loading boulders...</p>
+          <p class="text-muted">Carregando boulders...</p>
         </div>
         <div v-else-if="error" class="text-center py-4">
           <p class="text-danger">{{ error }}</p>
@@ -27,11 +27,11 @@
             <thead>
               <tr>
                 <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col">City</th>
-                <th scope="col">Sector</th>
-                <th scope="col">Difficulty</th>
-                <th scope="col">Ascents</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Cidade</th>
+                <th scope="col">Setor</th>
+                <th scope="col">Dificuldade</th>
+                <th scope="col">Ascensões</th>
                 <th scope="col"></th>
               </tr>
             </thead>
@@ -66,18 +66,21 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="boulderModalLabel">Boulder Details</h5>
+            <h5 class="modal-title" id="boulderModalLabel">Detalhes do Boulder</h5>
             <button type="button" class="btn-close" @click="hideModal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <p><strong>Name:</strong> {{ selectedBoulder?.name }}</p>
-            <p><strong>City:</strong> {{ selectedBoulder?.city }}</p>
-            <p><strong>Sector:</strong> {{ selectedBoulder?.sector }}</p>
-            <p><strong>Difficulty:</strong> V{{ selectedBoulder?.difficulty }}</p>
-            <p><strong>Ascents:</strong> {{ selectedBoulder?.ascents }}</p>
+            <p><strong>Nome:</strong> {{ selectedBoulder?.name }}</p>
+            <p><strong>Cidade:</strong> {{ selectedBoulder?.city }}</p>
+            <p><strong>Setor:</strong> {{ selectedBoulder?.sector }}</p>
+            <p><strong>Dificuldade:</strong> V{{ selectedBoulder?.difficulty }}</p>
+            <p><strong>Ascensões:</strong> {{ selectedBoulder?.ascents }}</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="hideModal">Close</button>
+            <button v-if="user" type="button" class="btn btn-primary" @click="hideModal">
+              Adicionar
+            </button>
+            <button type="button" class="btn btn-secondary" @click="hideModal">Fechar</button>
           </div>
         </div>
       </div>
@@ -86,9 +89,9 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import type { Boulder } from '@/types/boulder'
+import type { User } from '@/types/user'
 
 export default {
   name: 'BoulderList',
@@ -98,47 +101,46 @@ export default {
       required: true,
     },
   },
-  setup(props) {
-    const boulders = ref<Boulder[]>([])
-    const loading = ref(true)
-    const error = ref<string | null>(null)
-    const selectedBoulder = ref<Boulder | null>(null)
-    const isModalVisible = ref(false)
-
-    const fetchBoulders = async () => {
+  data() {
+    return {
+      boulders: [] as Boulder[],
+      loading: true,
+      error: null as string | null,
+      selectedBoulder: null as Boulder | null,
+      isModalVisible: false,
+      user: null as User | null,
+    }
+  },
+  methods: {
+    async fetchBoulders() {
       try {
-        const response = await axios.get(`${props.url}/boulders/`)
-        boulders.value = response.data.boulders
+        const response = await axios.get(`${this.url}/boulders/`)
+        this.boulders = response.data.boulders
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          error.value = err.response?.data?.message || 'An error occurred while fetching boulders.'
+          this.error = err.response?.data?.message || 'An error occurred while fetching boulders.'
         } else {
-          error.value = 'An unexpected error occurred.'
+          this.error = 'An unexpected error occurred.'
         }
       } finally {
-        loading.value = false
+        this.loading = false
       }
-    }
+    },
 
-    const showModal = (boulder: Boulder) => {
-      selectedBoulder.value = boulder
-      isModalVisible.value = true
-    }
+    showModal(boulder: Boulder) {
+      this.selectedBoulder = boulder
+      this.isModalVisible = true
+    },
 
-    const hideModal = () => {
-      isModalVisible.value = false
-    }
-
-    onMounted(fetchBoulders)
-
-    return {
-      boulders,
-      loading,
-      error,
-      selectedBoulder,
-      isModalVisible,
-      showModal,
-      hideModal,
+    hideModal() {
+      this.isModalVisible = false
+    },
+  },
+  async mounted() {
+    await this.fetchBoulders()
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      this.user = JSON.parse(storedUser) as User
     }
   },
 }

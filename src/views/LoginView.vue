@@ -34,7 +34,7 @@ export default {
       if (this.signUpSuccess.success && this.signUpSuccess.redirect)
         setTimeout(() => {
           this.$router.push('/')
-        }, 3000)
+        }, 1000)
     },
   },
   components: {

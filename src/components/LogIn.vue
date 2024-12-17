@@ -34,6 +34,9 @@
 </template>
 
 <script lang="ts">
+import type { UserAuth } from '@/types/user'
+import axios from 'axios'
+
 export default {
   name: 'LogIn',
   props: {
@@ -46,8 +49,38 @@ export default {
     return { email: '', password: '' }
   },
   methods: {
-    handleSubmit() {
-      console.log({ email: this.email, password: this.password })
+    async handleSubmit() {
+      const data = {
+        email: this.email,
+        password: this.password,
+      }
+      try {
+        const response = await axios.post(`${this.$props.url}/login`, data)
+        const user: UserAuth = {
+          id: response.data.id,
+          email: response.data.email,
+          name: response.data.name,
+          token: response.data.token,
+        }
+
+        this.SaveToStore(user)
+        this.$emit('success', {
+          success: true,
+          message: 'Login efetuado com sucesso !',
+          redirect: true,
+        })
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          this.$emit('success', { success: false, message: error.response?.data, redirect: true })
+        }
+      }
+    },
+    SaveToStore(user: UserAuth) {
+      localStorage.setItem(
+        'user',
+        JSON.stringify({ id: user.id, email: user.email, name: user.name }),
+      )
+      localStorage.setItem('token', user.token)
     },
   },
 }

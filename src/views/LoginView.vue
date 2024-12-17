@@ -6,8 +6,8 @@
     {{ signUpSuccess.message }}
   </div>
   <div class="login-form">
-    <LogIn :url="url" />
-    <SignUp :url="url" @success="handleSignUpSuccess" />
+    <LogIn :url="url" @success="handleSuccess" />
+    <SignUp :url="url" @success="handleSuccess" />
   </div>
 </template>
 
@@ -24,11 +24,17 @@ export default {
     },
   },
   data() {
-    return { signUpSuccess: null as { success: boolean; message: string } | null }
+    return {
+      signUpSuccess: null as { success: boolean; message: string; redirect: boolean } | null,
+    }
   },
   methods: {
-    handleSignUpSuccess(data: { success: boolean; message: string }) {
+    handleSuccess(data: { success: boolean; message: string; redirect: boolean }) {
       this.signUpSuccess = data
+      if (this.signUpSuccess.success && this.signUpSuccess.redirect)
+        setTimeout(() => {
+          this.$router.push('/')
+        }, 3000)
     },
   },
   components: {

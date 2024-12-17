@@ -68,15 +68,24 @@ export default {
           id: response.data.id,
           email: response.data.email,
           name: response.data.name,
-          permissions: response.data.permissions,
         }
 
-        this.$emit('success', { success: true, message: 'Usuário criado com sucesso !' })
+        this.SaveToSession(user)
+
+        this.$emit('success', {
+          success: true,
+          message: 'Usuário criado com sucesso !',
+          redirect: false,
+        })
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          this.$emit('success', { success: false, message: error.response?.data })
+          this.$emit('success', { success: false, message: error.response?.data, redirect: false })
         }
       }
+    },
+
+    SaveToSession(user: User) {
+      sessionStorage.setItem('user', JSON.stringify(user))
     },
   },
 }

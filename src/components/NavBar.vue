@@ -35,13 +35,18 @@
           </li>
         </ul>
         <div class="d-flex align-items-center">
-          <div v-if="user">
+          <div v-if="user.id != 0">
             <span class="me-2"
               ><strong>{{ user.name }}</strong></span
             >
             <span class="text-muted">({{ user.email }})</span>
           </div>
-          <button class="btn btn-outline-primary ms-3" @click="logout">Logout</button>
+          <button v-if="user.id != 0" class="btn btn-outline-primary ms-3" @click="logout">
+            Logout
+          </button>
+          <button v-if="user.id == 0" class="btn btn-outline-primary ms-3" @click="login">
+            Login
+          </button>
         </div>
       </div>
     </div>
@@ -53,16 +58,29 @@ import type { User } from '@/types/user'
 
 export default {
   name: 'NavBar',
-  props: {
-    user: {
-      type: Object as () => User,
-      required: true,
-    },
+  data() {
+    return {
+      user: { id: 0, name: '', email: '' } as User,
+    }
+  },
+  mounted() {
+    this.fetchUser()
   },
   methods: {
+    fetchUser() {
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        this.user = JSON.parse(storedUser)
+      }
+    },
     logout() {
-      alert('Logging out...')
-      // Lógica de logout pode ser adicionada aqui
+      this.removeFromStore()
+    },
+    login() {
+      this.$router.push('/login')
+    },
+    removeFromStore() {
+      localStorage.removeItem('user')
     },
   },
 }

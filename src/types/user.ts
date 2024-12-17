@@ -2,5 +2,11 @@ export type User = {
     id: number
     name: string
     email: string
-    permissions: number[]
+}
+
+export type UserAuth = {
+    id: number
+    name: string
+    email: string
+    token: string
 }

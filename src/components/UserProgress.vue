@@ -3,7 +3,7 @@
     <div class="card-body">
       <div class="info">
         <h3>SCORE</h3>
-        <h4 class="text-muted">5340</h4>
+        <h4 class="text-muted">{{ score }}</h4>
       </div>
       |
       <div class="info">
@@ -29,6 +29,10 @@ export default {
   name: 'UserProgress',
   props: {
     len: {
+      type: Number,
+      required: true,
+    },
+    score: {
       type: Number,
       required: true,
     },

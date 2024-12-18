@@ -23,6 +23,7 @@ export default {
   mounted() {
     this.fetchUser()
     watch(() => this.$route, this.fetchUser)
+    watch(() => this.qntBoulders, this.fetchUser)
   },
   methods: {
     async fetchUser() {
@@ -39,15 +40,7 @@ export default {
             },
           })
           this.user = response.data
-        } catch (err) {
-          if (axios.isAxiosError(err)) {
-            // this.$emit('success', { success: false, message: err.response?.data })
-          } else {
-            // this.$emit('success', {
-            //   success: false,
-            //   message: 'An unexpected error occurred.',
-            // })
-          }
+        } finally {
         }
       }
     },

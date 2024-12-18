@@ -1,3 +1,96 @@
+<script lang="ts">
+import axios from 'axios'
+import type { Boulder } from '@/types/boulder'
+import type { User } from '@/types/user'
+
+export default {
+  name: 'BoulderList',
+  props: {
+    url: {
+      type: String,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      boulders: [] as Boulder[],
+      loading: true,
+      error: null as string | null,
+      selectedBoulder: null as Boulder | null,
+      isModalVisible: false,
+    }
+  },
+  methods: {
+    async fetchBoulders() {
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        const user = JSON.parse(storedUser) as User
+        try {
+          const response = await axios.get(`${this.url}/ascents`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+            params: {
+              userId: user.id,
+            },
+          })
+          this.boulders = response.data.boulders
+        } catch (err) {
+          if (axios.isAxiosError(err)) {
+            this.error = err.response?.data?.message || 'An error occurred while fetching boulders.'
+          } else {
+            this.error = 'An unexpected error occurred.'
+          }
+        } finally {
+          this.loading = false
+        }
+      }
+    },
+
+    async remover() {
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        const user = JSON.parse(storedUser) as User
+        try {
+          await axios.delete(`${this.url}/ascents`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+            params: {
+              userId: user.id,
+              boulderId: this.selectedBoulder?.id,
+            },
+          })
+          this.boulders = this.boulders.filter((boulder) => boulder.id != this.selectedBoulder?.id)
+        } catch (err) {
+          if (axios.isAxiosError(err)) {
+            this.error = err.response?.data?.message || 'An error occurred while fetching boulders.'
+          } else {
+            this.error = 'An unexpected error occurred.'
+          }
+        } finally {
+          this.$emit('qntBoulders', this.boulders.length)
+          this.isModalVisible = false
+        }
+      }
+    },
+
+    showModal(boulder: Boulder) {
+      this.selectedBoulder = boulder
+      this.isModalVisible = true
+    },
+
+    hideModal() {
+      this.isModalVisible = false
+    },
+  },
+  async mounted() {
+    await this.fetchBoulders()
+    this.$emit('qntBoulders', this.boulders.length)
+  },
+}
+</script>
+
 <template>
   <div class="container-fluid bg-light py-4">
     <div class="row justify-content-center">
@@ -17,7 +110,7 @@
           </form>
         </nav>
         <div v-if="loading" class="text-center py-4">
-          <p class="text-muted">Loading boulders...</p>
+          <p class="text-muted">Carregando boulders...</p>
         </div>
         <div v-else-if="error" class="text-center py-4">
           <p class="text-danger">{{ error }}</p>
@@ -62,7 +155,7 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="boulderModalLabel">Boulder Details</h5>
+            <h5 class="modal-title" id="boulderModalLabel">Detalhes do Boulder</h5>
             <button type="button" class="btn-close" @click="hideModal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -73,78 +166,14 @@
             <p><strong>Ascents:</strong> {{ selectedBoulder?.ascents }}</p>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="hideModal">Close</button>
+            <button type="button" class="btn btn-danger" @click="remover">Remover</button>
+            <button type="button" class="btn btn-secondary" @click="hideModal">Fechar</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import axios from 'axios'
-import type { Boulder } from '@/types/boulder'
-import type { User } from '@/types/user'
-
-export default {
-  name: 'BoulderList',
-  props: {
-    url: {
-      type: String,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      boulders: [] as Boulder[],
-      loading: true,
-      error: null as string | null,
-      selectedBoulder: null as Boulder | null,
-      isModalVisible: false,
-    }
-  },
-  methods: {
-    async fetchBoulders() {
-      const storedUser = localStorage.getItem('user')
-      if (storedUser) {
-        const user = JSON.parse(storedUser) as User
-        try {
-          const response = await axios.get(`${this.url}/user/ascents`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-            params: {
-              userId: user.id,
-            },
-          })
-          this.boulders = response.data.boulders
-        } catch (err) {
-          if (axios.isAxiosError(err)) {
-            this.error = err.response?.data?.message || 'An error occurred while fetching boulders.'
-          } else {
-            this.error = 'An unexpected error occurred.'
-          }
-        } finally {
-          this.loading = false
-        }
-      }
-    },
-
-    showModal(boulder: Boulder) {
-      this.selectedBoulder = boulder
-      this.isModalVisible = true
-    },
-
-    hideModal() {
-      this.isModalVisible = false
-    },
-  },
-  async mounted() {
-    await this.fetchBoulders()
-    this.$emit('qntBoulders', this.boulders.length)
-  },
-}
-</script>
 
 <style scoped>
 .table th,

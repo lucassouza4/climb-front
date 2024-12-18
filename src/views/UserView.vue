@@ -3,6 +3,7 @@ import UserBoulderList from '@/components/UserBoulderList.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import UserProgress from '@/components/UserProgress.vue'
 import type { User } from '@/types/user'
+import axios from 'axios'
 import { watch } from 'vue'
 
 export default {
@@ -24,12 +25,30 @@ export default {
     watch(() => this.$route, this.fetchUser)
   },
   methods: {
-    fetchUser() {
+    async fetchUser() {
       const storedUser = localStorage.getItem('user')
       if (storedUser) {
-        this.user = JSON.parse(storedUser)
-      } else {
-        this.user = null
+        const user = JSON.parse(storedUser) as User
+        try {
+          const response = await axios.get(`${this.url}/user`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+            params: {
+              userId: user.id,
+            },
+          })
+          this.user = response.data
+        } catch (err) {
+          if (axios.isAxiosError(err)) {
+            // this.$emit('success', { success: false, message: err.response?.data })
+          } else {
+            // this.$emit('success', {
+            //   success: false,
+            //   message: 'An unexpected error occurred.',
+            // })
+          }
+        }
       }
     },
     handleQntboulders(len: number) {

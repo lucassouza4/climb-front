@@ -114,7 +114,7 @@ export default {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
             params: {
-              userId: user.id, // Passa o userId como query param
+              userId: user.id,
             },
           })
           this.boulders = response.data.boulders

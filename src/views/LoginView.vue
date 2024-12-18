@@ -1,16 +1,3 @@
-<template>
-  <div v-if="signUpSuccess?.success === true" class="alert alert-success" role="alert">
-    {{ signUpSuccess.message }}
-  </div>
-  <div v-if="signUpSuccess?.success === false" class="alert alert-danger" role="alert">
-    {{ signUpSuccess.message }}
-  </div>
-  <div class="login-form">
-    <LogIn :url="url" @success="handleSuccess" />
-    <SignUp :url="url" @success="handleSuccess" />
-  </div>
-</template>
-
 <script lang="ts">
 import LogIn from '@/components/LogIn.vue'
 import SignUp from '@/components/signUp.vue'
@@ -43,6 +30,19 @@ export default {
   },
 }
 </script>
+
+<template>
+  <div v-if="signUpSuccess?.success === true" class="alert alert-success" role="alert">
+    {{ signUpSuccess.message }}
+  </div>
+  <div v-if="signUpSuccess?.success === false" class="alert alert-danger" role="alert">
+    {{ signUpSuccess.message }}
+  </div>
+  <div class="login-form">
+    <LogIn :url="url" @success="handleSuccess" />
+    <SignUp :url="url" @success="handleSuccess" />
+  </div>
+</template>
 
 <style scoped>
 .login-form {

@@ -27,6 +27,12 @@
           <li v-if="user" class="nav-item">
             <RouterLink to="/user" class="nav-link">Perfil</RouterLink>
           </li>
+          <li v-if="user" class="nav-item">
+            <RouterLink to="/climbers" class="nav-link">Escaladores</RouterLink>
+          </li>
+          <li v-if="user" class="nav-item">
+            <RouterLink to="/ranking" class="nav-link">Ranking</RouterLink>
+          </li>
         </ul>
         <div class="d-flex align-items-center">
           <div v-if="user">

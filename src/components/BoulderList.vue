@@ -2,7 +2,7 @@
   <div class="container-fluid bg-light py-4">
     <div class="row justify-content-center">
       <div class="col-12 col-lg-10">
-        <h1 class="h3 mb-4">Boulder Rank</h1>
+        <h1 class="h3 mb-4">Boulders</h1>
         <nav class="navbar navbar-light bg-light">
           <form class="form-inline">
             <input
@@ -77,7 +77,7 @@
             <p><strong>Ascensões:</strong> {{ selectedBoulder?.ascents }}</p>
           </div>
           <div class="modal-footer">
-            <button v-if="user" type="button" class="btn btn-primary" @click="hideModal">
+            <button v-if="user" type="button" class="btn btn-primary" @click="adicionar">
               Adicionar
             </button>
             <button type="button" class="btn btn-secondary" @click="hideModal">Fechar</button>
@@ -118,9 +118,12 @@ export default {
         this.boulders = response.data.boulders
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          this.error = err.response?.data?.message || 'An error occurred while fetching boulders.'
+          this.$emit('success', { success: false, message: err.response?.data })
         } else {
-          this.error = 'An unexpected error occurred.'
+          this.$emit('success', {
+            success: false,
+            message: 'An unexpected error occurred.',
+          })
         }
       } finally {
         this.loading = false
@@ -134,6 +137,41 @@ export default {
 
     hideModal() {
       this.isModalVisible = false
+    },
+    async adicionar() {
+      const data = {
+        userId: this.user?.id,
+        boulderId: this.selectedBoulder?.id,
+      }
+
+      try {
+        const user = await axios.post(`${this.url}/ascents/create`, data, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        })
+
+        localStorage.setItem('user', JSON.stringify(user.data))
+
+        this.$emit('success', {
+          success: true,
+          message: 'Boulder adicionado com sucesso !',
+        })
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          this.$emit('success', {
+            success: false,
+            message: err.response?.data,
+          })
+        } else {
+          this.$emit('success', {
+            success: false,
+            message: 'An unexpected error occurred.',
+          })
+        }
+      } finally {
+        this.hideModal()
+      }
     },
   },
   async mounted() {

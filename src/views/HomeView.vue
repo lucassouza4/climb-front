@@ -9,6 +9,16 @@ export default {
       required: true,
     },
   },
+  data() {
+    return {
+      addBoulderSuccess: null as { success: boolean; message: string } | null,
+    }
+  },
+  methods: {
+    handleSuccess(data: { success: boolean; message: string }) {
+      this.addBoulderSuccess = data
+    },
+  },
   components: {
     BoulderList,
   },
@@ -16,5 +26,11 @@ export default {
 </script>
 
 <template>
-  <BoulderList :url="url" />
+  <div v-if="addBoulderSuccess?.success === true" class="alert alert-success" role="alert">
+    {{ addBoulderSuccess.message }}
+  </div>
+  <div v-if="addBoulderSuccess?.success === false" class="alert alert-danger" role="alert">
+    {{ addBoulderSuccess.message }}
+  </div>
+  <BoulderList :url="url" @success="handleSuccess" />
 </template>

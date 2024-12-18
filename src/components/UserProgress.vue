@@ -8,7 +8,7 @@
       |
       <div class="info">
         <h3>RANK</h3>
-        <h4 class="text-muted">1°</h4>
+        <h4 class="text-muted">-</h4>
       </div>
       |
       <div class="info">
@@ -18,7 +18,7 @@
       |
       <div class="info">
         <h3>VIAS</h3>
-        <h4 class="text-muted">33</h4>
+        <h4 class="text-muted">-</h4>
       </div>
     </div>
   </div>

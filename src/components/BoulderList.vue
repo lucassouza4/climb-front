@@ -4,8 +4,9 @@
       <div class="col-12 col-lg-10">
         <h1 class="h3 mb-4">Boulders</h1>
         <nav class="navbar navbar-light bg-light">
-          <form class="form-inline">
+          <form class="form-inline" @submit.prevent="searchBoulders">
             <input
+              v-model="searchQuery"
               class="form-control mr-sm-2"
               type="search"
               placeholder="Buscar boulder"
@@ -19,9 +20,6 @@
         <div v-if="loading" class="text-center py-4">
           <p class="text-muted">Carregando boulders...</p>
         </div>
-        <div v-else-if="error" class="text-center py-4">
-          <p class="text-danger">{{ error }}</p>
-        </div>
         <div v-else class="table-responsive">
           <table class="table table-striped">
             <thead>
@@ -32,11 +30,11 @@
                 <th scope="col">Setor</th>
                 <th scope="col">Dificuldade</th>
                 <th scope="col">Ascensões</th>
-                <th scope="col"></th>
+                <th scope="col">Ações</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(boulder, index) in boulders" :key="boulder.id">
+              <tr v-for="(boulder, index) in filteredBoulders" :key="boulder.id">
                 <td>{{ index + 1 }}</td>
                 <td>{{ boulder.name }}</td>
                 <td>{{ boulder.city }}</td>
@@ -56,45 +54,29 @@
     </div>
 
     <!-- Modal -->
-    <div
+    <BoulderModal
       v-if="isModalVisible"
-      class="modal fade show d-block"
-      tabindex="-1"
-      aria-labelledby="boulderModalLabel"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="boulderModalLabel">Detalhes do Boulder</h5>
-            <button type="button" class="btn-close" @click="hideModal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <p><strong>Nome:</strong> {{ selectedBoulder?.name }}</p>
-            <p><strong>Cidade:</strong> {{ selectedBoulder?.city }}</p>
-            <p><strong>Setor:</strong> {{ selectedBoulder?.sector }}</p>
-            <p><strong>Dificuldade:</strong> V{{ selectedBoulder?.difficulty }}</p>
-            <p><strong>Ascensões:</strong> {{ selectedBoulder?.ascents }}</p>
-          </div>
-          <div class="modal-footer">
-            <button v-if="user" type="button" class="btn btn-primary" @click="adicionar">
-              Adicionar
-            </button>
-            <button type="button" class="btn btn-secondary" @click="hideModal">Fechar</button>
-          </div>
-        </div>
-      </div>
-    </div>
+      :boulder="selectedBoulder"
+      :user="user"
+      :isVisible="isModalVisible"
+      :url="url"
+      @close="hideModal"
+      @success="handleSuccess"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import axios from 'axios'
+import BoulderModal from '@/components/BoulderModal.vue'
 import type { Boulder } from '@/types/boulder'
 import type { User } from '@/types/user'
 
 export default {
   name: 'BoulderList',
+  components: {
+    BoulderModal,
+  },
   props: {
     url: {
       type: String,
@@ -105,70 +87,49 @@ export default {
     return {
       boulders: [] as Boulder[],
       loading: true,
-      error: null as string | null,
+      searchQuery: '',
       selectedBoulder: null as Boulder | null,
       isModalVisible: false,
       user: null as User | null,
     }
   },
+  computed: {
+    filteredBoulders() {
+      return this.boulders.filter((boulder) =>
+        boulder.name.toLowerCase().includes(this.searchQuery.toLowerCase()),
+      )
+    },
+  },
   methods: {
     async fetchBoulders() {
       try {
-        const response = await axios.get(`${this.url}/boulders/`) // CHAMADA DEVERIA SER CACHEADA ?
+        const response = await axios.get(`${this.url}/boulders/`)
         this.boulders = response.data.boulders
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          this.$emit('success', { success: false, message: err.response?.data })
-        } else {
-          this.$emit('success', {
-            success: false,
-            message: 'An unexpected error occurred.',
-          })
-        }
+      } catch {
       } finally {
         this.loading = false
       }
     },
-
     showModal(boulder: Boulder) {
       this.selectedBoulder = boulder
       this.isModalVisible = true
     },
-
     hideModal() {
       this.isModalVisible = false
     },
-    async adicionar() {
-      const data = {
-        userId: this.user?.id,
-        boulderId: this.selectedBoulder?.id,
-      }
+    searchBoulders() {
+      // Logic for search can be extended here if needed
+    },
+    handleSuccess(event: { success: boolean; message: string }) {
+      this.$emit('success', event)
 
-      try {
-        await axios.post(`${this.url}/ascents/create`, data, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        })
-
-        this.$emit('success', {
-          success: true,
-          message: 'Boulder adicionado com sucesso !',
-        })
-      } catch (err) {
-        if (axios.isAxiosError(err)) {
-          this.$emit('success', {
-            success: false,
-            message: err.response?.data,
-          })
-        } else {
-          this.$emit('success', {
-            success: false,
-            message: 'An unexpected error occurred.',
-          })
+      if (event.success) {
+        const updatedBoulder = this.boulders.find(
+          (boulder) => boulder.id === this.selectedBoulder?.id,
+        )
+        if (updatedBoulder) {
+          updatedBoulder.ascents += 1
         }
-      } finally {
-        this.hideModal()
       }
     },
   },
@@ -192,9 +153,6 @@ export default {
   width: 100%;
 }
 .form-control {
-  margin-right: 50px;
-}
-.modal {
-  background-color: rgba(0, 0, 0, 0.5);
+  margin-right: 10px;
 }
 </style>

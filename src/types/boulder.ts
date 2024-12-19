@@ -1,5 +1,5 @@
 export type Boulder = {
-    id: number
+    id: string
     name: string
     city: string
     sector: string

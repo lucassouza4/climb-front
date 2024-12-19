@@ -28,9 +28,9 @@
 <script lang="ts">
 import { Type } from '@/enums/user'
 import type { User } from '@/types/user'
-import { reactive } from 'vue'
+import { defineComponent, reactive } from 'vue'
 
-export default {
+export default defineComponent({
   name: 'UserInfo',
   props: {
     bouldersByDifficulty: {
@@ -72,7 +72,7 @@ export default {
       }
     },
     getTypeName(type: number): string {
-      return Type[type] // Converte o valor numérico para o nome do enum
+      return Type[type]
     },
     getTypeClass(type: Type): string {
       switch (type) {
@@ -83,7 +83,7 @@ export default {
       }
     },
   },
-}
+})
 </script>
 <style scoped>
 .card {

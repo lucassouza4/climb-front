@@ -20,6 +20,9 @@
         <div v-if="loading" class="text-center py-4">
           <p class="text-muted">Carregando boulders...</p>
         </div>
+        <div v-else-if="error" class="text-center py-4">
+          <p class="text-danger">{{ error }}</p>
+        </div>
         <div v-else class="table-responsive">
           <table class="table table-striped">
             <thead>
@@ -71,8 +74,9 @@ import axios from 'axios'
 import BoulderModal from '@/components/BoulderModal.vue'
 import type { Boulder } from '@/types/boulder'
 import type { User } from '@/types/user'
+import { defineComponent } from 'vue'
 
-export default {
+export default defineComponent({
   name: 'BoulderList',
   components: {
     BoulderModal,
@@ -88,6 +92,7 @@ export default {
       boulders: [] as Boulder[],
       loading: true,
       searchQuery: '',
+      error: '',
       selectedBoulder: {} as Boulder,
       isModalVisible: false,
       user: {} as User,
@@ -106,11 +111,12 @@ export default {
         const response = await axios.get(`${this.url}/boulders/`)
         this.boulders = response.data.boulders
       } catch {
+        this.error = 'An error occurred while fetching boulders.'
       } finally {
         this.loading = false
       }
     },
-    orderedBoulders() {
+    sortedBoulders() {
       this.boulders.sort((a, b) => b.ascents - a.ascents)
     },
     showModal(boulder: Boulder) {
@@ -132,7 +138,7 @@ export default {
         )
         if (updatedBoulder) {
           updatedBoulder.ascents += 1
-          this.orderedBoulders()
+          this.sortedBoulders()
         }
       }
     },
@@ -144,7 +150,7 @@ export default {
       this.user = JSON.parse(storedUser) as User
     }
   },
-}
+})
 </script>
 
 <style scoped>

@@ -1,7 +1,8 @@
 <script lang="ts">
 import BoulderList from '@/components/BoulderList.vue'
+import { defineComponent } from 'vue'
 
-export default {
+export default defineComponent({
   name: 'HomeView',
   props: {
     url: {
@@ -22,7 +23,7 @@ export default {
   components: {
     BoulderList,
   },
-}
+})
 </script>
 
 <template>

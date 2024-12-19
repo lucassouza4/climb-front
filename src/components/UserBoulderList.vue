@@ -2,8 +2,9 @@
 import axios from 'axios'
 import type { Boulder } from '@/types/boulder'
 import type { User } from '@/types/user'
+import { defineComponent } from 'vue'
 
-export default {
+export default defineComponent({
   name: 'BoulderList',
   props: {
     url: {
@@ -16,10 +17,15 @@ export default {
       boulders: [] as Boulder[],
       bouldersByDifficulty: {} as { [key: number]: number },
       loading: true,
-      error: null as string | null,
-      selectedBoulder: null as Boulder | null,
+      error: '',
+      selectedBoulder: {} as Boulder,
       isModalVisible: false,
     }
+  },
+  computed: {
+    sortedBoulders() {
+      return [...this.boulders].sort((a, b) => b.difficulty - a.difficulty)
+    },
   },
   methods: {
     async fetchBoulders() {
@@ -39,12 +45,8 @@ export default {
           this.boulders = response.data.boulders
           this.$emit('qntBoulders', this.boulders.length)
           this.emitBouldersByDifficulty()
-        } catch (err) {
-          if (axios.isAxiosError(err)) {
-            this.error = err.response?.data?.message || 'An error occurred while fetching boulders.'
-          } else {
-            this.error = 'An unexpected error occurred.'
-          }
+        } catch {
+          this.error = 'An error occurred while fetching boulders.'
         } finally {
           this.loading = false
         }
@@ -78,12 +80,7 @@ export default {
             },
           })
           this.boulders = this.boulders.filter((boulder) => boulder.id != this.selectedBoulder?.id)
-        } catch (err) {
-          if (axios.isAxiosError(err)) {
-            this.error = err.response?.data?.message || 'An error occurred while fetching boulders.'
-          } else {
-            this.error = 'An unexpected error occurred.'
-          }
+        } catch {
         } finally {
           this.$emit('qntBoulders', this.boulders.length)
           this.emitBouldersByDifficulty()
@@ -104,7 +101,7 @@ export default {
   async mounted() {
     await this.fetchBoulders()
   },
-}
+})
 </script>
 
 <template>
@@ -143,7 +140,7 @@ export default {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="boulder in boulders" :key="boulder.id">
+              <tr v-for="boulder in sortedBoulders" :key="boulder.id">
                 <td>{{ boulder.name }}</td>
                 <td>{{ boulder.city }}</td>
                 <td>{{ boulder.sector }}</td>

@@ -4,9 +4,9 @@ import UserInfo from '@/components/UserInfo.vue'
 import UserProgress from '@/components/UserProgress.vue'
 import type { User } from '@/types/user'
 import axios from 'axios'
-import { watch } from 'vue'
+import { defineComponent, watch } from 'vue'
 
-export default {
+export default defineComponent({
   name: 'UserView',
   props: {
     url: {
@@ -59,7 +59,7 @@ export default {
     UserProgress,
     UserBoulderList,
   },
-}
+})
 </script>
 
 <template>

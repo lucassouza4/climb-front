@@ -88,9 +88,9 @@ export default {
       boulders: [] as Boulder[],
       loading: true,
       searchQuery: '',
-      selectedBoulder: null as Boulder | null,
+      selectedBoulder: {} as Boulder,
       isModalVisible: false,
-      user: null as User | null,
+      user: {} as User,
     }
   },
   computed: {

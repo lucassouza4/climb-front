@@ -44,12 +44,12 @@ export default defineComponent({
       required: true,
     },
     boulder: {
-      type: Object as () => Boulder | null,
+      type: Object as () => Boulder,
       required: false,
       default: null,
     },
     user: {
-      type: Object as () => User | null,
+      type: Object as () => User,
       required: false,
       default: null,
     },

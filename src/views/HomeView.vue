@@ -11,7 +11,7 @@ export default {
   },
   data() {
     return {
-      addBoulderSuccess: null as { success: boolean; message: string } | null,
+      addBoulderSuccess: {} as { success: boolean; message: string },
     }
   },
   methods: {

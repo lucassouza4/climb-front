@@ -128,9 +128,6 @@ export default defineComponent({
     close() {
       this.$emit('close')
     },
-    toggleDropdown() {
-      this.dropdownOpen = !this.dropdownOpen
-    },
     async addAscent() {
       console.log(this.changedBoulder)
     },

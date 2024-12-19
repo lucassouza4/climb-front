@@ -33,7 +33,7 @@
                 <th scope="col">Setor</th>
                 <th scope="col">Dificuldade</th>
                 <th scope="col">Ascensões</th>
-                <th scope="col">Ações</th>
+                <th class="texto-acao" scope="col">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -44,9 +44,21 @@
                 <td>{{ boulder.sector }}</td>
                 <td>V{{ boulder.difficulty }}</td>
                 <td>{{ boulder.ascents }}</td>
-                <td>
-                  <button type="button" class="btn btn-outline-info" @click="showModal(boulder)">
+                <td class="botao-acao">
+                  <button
+                    type="button"
+                    class="table-button btn btn-outline-info"
+                    @click="showInfoModal(boulder)"
+                  >
                     Info
+                  </button>
+                  <button
+                    v-if="hasPermission"
+                    type="button"
+                    class="table-button btn btn-outline-warning"
+                    @click="showEditModal(boulder)"
+                  >
+                    Editar
                   </button>
                 </td>
               </tr>
@@ -57,13 +69,23 @@
     </div>
 
     <!-- Modal -->
-    <BoulderModal
-      v-if="isModalVisible"
+    <BoulderInfoModal
+      v-if="isModalInfoVisible"
       :boulder="selectedBoulder"
       :user="user"
-      :isVisible="isModalVisible"
+      :isVisible="isModalInfoVisible"
       :url="url"
-      @close="hideModal"
+      @close="hideInfoModal"
+      @success="handleSuccess"
+    />
+
+    <BoulderEditModal
+      v-if="isModalEditVisible"
+      :boulder="selectedBoulder"
+      :user="user"
+      :isVisible="isModalEditVisible"
+      :url="url"
+      @close="hideEditModal"
       @success="handleSuccess"
     />
   </div>
@@ -71,15 +93,20 @@
 
 <script lang="ts">
 import axios from 'axios'
-import BoulderModal from '@/components/BoulderModal.vue'
+import { jwtDecode } from 'jwt-decode'
+import BoulderInfoModal from '@/components/BoulderInfoModal.vue'
 import type { Boulder } from '@/types/boulder'
 import type { User } from '@/types/user'
 import { defineComponent } from 'vue'
+import { Permissions } from '@/enums/user'
+import type { TokenPayload } from '@/types/tokenPayload'
+import BoulderEditModal from './BoulderEditModal.vue'
 
 export default defineComponent({
   name: 'BoulderList',
   components: {
-    BoulderModal,
+    BoulderInfoModal,
+    BoulderEditModal,
   },
   props: {
     url: {
@@ -90,11 +117,13 @@ export default defineComponent({
   data() {
     return {
       boulders: [] as Boulder[],
+      permissions: [] as Permissions[],
       loading: true,
       searchQuery: '',
       error: '',
       selectedBoulder: {} as Boulder,
-      isModalVisible: false,
+      isModalInfoVisible: false,
+      isModalEditVisible: false,
       user: {} as User,
     }
   },
@@ -103,6 +132,9 @@ export default defineComponent({
       return this.boulders.filter((boulder) =>
         boulder.name.toLowerCase().includes(this.searchQuery.toLowerCase()),
       )
+    },
+    hasPermission() {
+      return this.permissions.includes(Permissions.UPDATE_BOULDER)
     },
   },
   methods: {
@@ -119,12 +151,19 @@ export default defineComponent({
     sortedBoulders() {
       this.boulders.sort((a, b) => b.ascents - a.ascents)
     },
-    showModal(boulder: Boulder) {
+    showInfoModal(boulder: Boulder) {
       this.selectedBoulder = boulder
-      this.isModalVisible = true
+      this.isModalInfoVisible = true
     },
-    hideModal() {
-      this.isModalVisible = false
+    showEditModal(boulder: Boulder) {
+      this.selectedBoulder = boulder
+      this.isModalEditVisible = true
+    },
+    hideInfoModal() {
+      this.isModalInfoVisible = false
+    },
+    hideEditModal() {
+      this.isModalEditVisible = false
     },
     searchBoulders() {
       // Logic for search can be extended here if needed
@@ -142,13 +181,19 @@ export default defineComponent({
         }
       }
     },
+    decodeToken(token: string) {
+      const decoded = jwtDecode(token) as TokenPayload
+      this.permissions = decoded.permissions
+    },
   },
   async mounted() {
     await this.fetchBoulders()
     const storedUser = localStorage.getItem('user')
+    const storedToken = localStorage.getItem('token')
     if (storedUser) {
       this.user = JSON.parse(storedUser) as User
     }
+    if (storedToken) this.decodeToken(storedToken)
   },
 })
 </script>
@@ -164,5 +209,16 @@ export default defineComponent({
 }
 .form-control {
   margin-right: 10px;
+}
+.table-button {
+  margin: 1rem;
+}
+.texto-acao {
+  text-align: center;
+}
+.botao-acao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

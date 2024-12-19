@@ -23,7 +23,7 @@
           <button v-if="user" type="button" class="btn btn-primary" @click="addAscent">
             Adicionar
           </button>
-          <button type="button" class="btn btn-secondary" @click="close">Fechar</button>
+          <button type="button" class="btn btn-light" @click="close">Fechar</button>
         </div>
       </div>
     </div>
@@ -37,7 +37,7 @@ import type { User } from '@/types/user'
 import axios from 'axios'
 
 export default defineComponent({
-  name: 'BoulderModal',
+  name: 'BoulderInfoModal',
   props: {
     isVisible: {
       type: Boolean,

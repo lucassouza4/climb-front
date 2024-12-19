@@ -110,6 +110,9 @@ export default {
         this.loading = false
       }
     },
+    orderedBoulders() {
+      this.boulders.sort((a, b) => b.ascents - a.ascents)
+    },
     showModal(boulder: Boulder) {
       this.selectedBoulder = boulder
       this.isModalVisible = true
@@ -129,6 +132,7 @@ export default {
         )
         if (updatedBoulder) {
           updatedBoulder.ascents += 1
+          this.orderedBoulders()
         }
       }
     },

@@ -5,18 +5,39 @@
         <h1 class="h3 mb-4">Boulders</h1>
         <nav class="navbar navbar-light bg-light">
           <form class="form-inline" @submit.prevent="searchBoulders">
-            <input
-              v-model="searchQuery"
-              class="form-control mr-sm-2"
-              type="search"
-              placeholder="Buscar boulder"
-              aria-label="Search"
-            />
-            <button class="btn btn-outline-success my-2 my-sm-0 btn-lg" type="submit">
-              Buscar
-            </button>
+            <div class="input-group">
+              <input
+                v-model="searchQuery"
+                class="form-control mr-sm-2"
+                type="search"
+                placeholder="Buscar boulder"
+                aria-label="Text input with dropdown button"
+              />
+              <div class="input-group-append">
+                <button
+                  id="dropdown-toggle"
+                  class="btn btn-outline-success my-2 my-sm-0 btn-lg dropdown-toggle"
+                  type="button"
+                >
+                  Filtro
+                </button>
+                <div id="dropdown-menu" class="dropdown-menu">
+                  <a class="dropdown-item" href="#" @click="selectItem('Nome')">Nome</a>
+                  <a class="dropdown-item" href="#" @click="selectItem('Cidade')">Cidade</a>
+                  <a class="dropdown-item" href="#" @click="selectItem('Setor')">Setor</a>
+                  <a class="dropdown-item" href="#" @click="selectItem('Dificuldade')"
+                    >Dificuldade</a
+                  >
+                </div>
+              </div>
+            </div>
           </form>
+          <span v-if="selectedFilter" class="texto-filtro" @click="selectItem('')">
+            {{ selectedFilter }}
+            <span class="bola-x">X</span>
+          </span>
         </nav>
+
         <div v-if="loading" class="text-center py-4">
           <p class="text-muted">Carregando boulders...</p>
         </div>
@@ -118,20 +139,40 @@ export default defineComponent({
     return {
       boulders: [] as Boulder[],
       permissions: [] as Permissions[],
-      loading: true,
-      searchQuery: '',
-      error: '',
       selectedBoulder: {} as Boulder,
+      user: {} as User,
+      loading: true,
       isModalInfoVisible: false,
       isModalEditVisible: false,
-      user: {} as User,
+      selectedFilter: '',
+      searchQuery: '',
+      error: '',
     }
   },
   computed: {
     filteredBoulders() {
-      return this.boulders.filter((boulder) =>
-        boulder.name.toLowerCase().includes(this.searchQuery.toLowerCase()),
-      )
+      switch (this.selectedFilter) {
+        case 'Nome':
+          return this.boulders.filter((boulder) =>
+            boulder.name.toLowerCase().includes(this.searchQuery.toLowerCase()),
+          )
+        case 'Cidade':
+          return this.boulders.filter((boulder) =>
+            boulder.city.toLowerCase().includes(this.searchQuery.toLowerCase()),
+          )
+        case 'Setor':
+          return this.boulders.filter((boulder) =>
+            boulder.sector.toLowerCase().includes(this.searchQuery.toLowerCase()),
+          )
+        case 'Dificuldade':
+          return this.boulders.filter(
+            (boulder) => boulder.difficulty.toString() === this.searchQuery.slice(1),
+          )
+        default:
+          return this.boulders.filter((boulder) =>
+            boulder.name.toLowerCase().includes(this.searchQuery.toLowerCase()),
+          )
+      }
     },
     hasPermission() {
       return this.permissions.includes(Permissions.UPDATE_BOULDER)
@@ -147,6 +188,9 @@ export default defineComponent({
       } finally {
         this.loading = false
       }
+    },
+    selectItem(filter: string) {
+      this.selectedFilter = filter
     },
     sortedBoulders() {
       this.boulders.sort((a, b) => b.ascents - a.ascents)
@@ -194,6 +238,24 @@ export default defineComponent({
       this.user = JSON.parse(storedUser) as User
     }
     if (storedToken) this.decodeToken(storedToken)
+
+    // Adicionando controle de dropdown com JavaScript
+    const dropdownToggle = document.getElementById('dropdown-toggle')
+    const dropdownMenu = document.getElementById('dropdown-menu')
+
+    dropdownToggle?.addEventListener('click', () => {
+      dropdownMenu?.classList.toggle('show')
+    })
+
+    // Fechar o dropdown ao clicar fora dele
+    document.addEventListener('click', (event) => {
+      if (
+        !dropdownToggle?.contains(event.target as Node) &&
+        !dropdownMenu?.contains(event.target as Node)
+      ) {
+        dropdownMenu?.classList.remove('show')
+      }
+    })
   },
 })
 </script>
@@ -220,5 +282,40 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
+}
+.dropdown-menu {
+  display: none;
+}
+.dropdown-menu.show {
+  display: block;
+}
+.texto-filtro {
+  background-color: blue; /* Fundo azul */
+  color: white; /* Texto branco */
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: bold;
+  display: inline-flex;
+  margin: 1rem;
+  align-items: baseline;
+  justify-content: space-around;
+}
+.texto-filtro:hover {
+  cursor: pointer;
+}
+.bola-x {
+  background-color: white; /* Fundo branco para o "x" */
+  color: blue; /* Cor do "x" igual ao fundo */
+  width: 18px; /* Largura da bola */
+  height: 18px; /* Altura da bola */
+  border-radius: 50%; /* Forma arredondada */
+  display: inline-flex;
+  align-items: center; /* Centraliza verticalmente */
+  justify-content: center; /* Centraliza horizontalmente */
+  font-size: 1rem; /* Tamanho do "x" */
+  line-height: 18px; /* Garante o alinhamento vertical perfeito */
+  margin-left: 8px;
+  cursor: pointer;
 }
 </style>

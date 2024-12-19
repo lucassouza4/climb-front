@@ -14,6 +14,7 @@ export default {
   data() {
     return {
       boulders: [] as Boulder[],
+      bouldersByDifficulty: {} as { [key: number]: number },
       loading: true,
       error: null as string | null,
       selectedBoulder: null as Boulder | null,
@@ -27,6 +28,7 @@ export default {
         const user = JSON.parse(storedUser) as User
         try {
           const response = await axios.get(`${this.url}/ascents`, {
+            // DEVERIA CHAMAR SEMPRE ? OU SÓ QUANDO HOUVER ALGUMA ATUALIZAÇÃO
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
@@ -35,6 +37,8 @@ export default {
             },
           })
           this.boulders = response.data.boulders
+          this.$emit('qntBoulders', this.boulders.length)
+          this.emitBouldersByDifficulty()
         } catch (err) {
           if (axios.isAxiosError(err)) {
             this.error = err.response?.data?.message || 'An error occurred while fetching boulders.'
@@ -45,6 +49,18 @@ export default {
           this.loading = false
         }
       }
+    },
+
+    emitBouldersByDifficulty() {
+      const difficulties: { [key: number]: number } = {}
+      this.boulders.forEach((boulder) => {
+        if (difficulties[boulder.difficulty]) {
+          difficulties[boulder.difficulty]++
+        } else {
+          difficulties[boulder.difficulty] = 1
+        }
+      })
+      this.$emit('bouldersByDifficulty', difficulties)
     },
 
     async remover() {
@@ -70,6 +86,7 @@ export default {
           }
         } finally {
           this.$emit('qntBoulders', this.boulders.length)
+          this.emitBouldersByDifficulty()
           this.isModalVisible = false
         }
       }
@@ -86,7 +103,6 @@ export default {
   },
   async mounted() {
     await this.fetchBoulders()
-    this.$emit('qntBoulders', this.boulders.length)
   },
 }
 </script>

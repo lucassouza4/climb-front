@@ -61,6 +61,7 @@ export default {
           email: response.data.email,
           name: response.data.name,
           score: response.data.score,
+          type: response.data.type,
           token: response.data.token,
         }
 
@@ -79,7 +80,13 @@ export default {
     SaveToStore(user: UserAuth) {
       localStorage.setItem(
         'user',
-        JSON.stringify({ id: user.id, email: user.email, name: user.name, score: user.score }),
+        JSON.stringify({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          score: user.score,
+          type: user.type,
+        }),
       )
       localStorage.setItem('token', user.token)
     },

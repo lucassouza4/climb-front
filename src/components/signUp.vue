@@ -69,6 +69,7 @@ export default {
           email: response.data.email,
           name: response.data.name,
           score: response.data.score,
+          type: response.data.type,
         }
 
         this.SaveToSession(user)

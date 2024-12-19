@@ -1,14 +1,17 @@
+
 export type User = {
-    id: number
+    id: string
     name: string
     email: string
     score:number
+    type:number
 }
 
 export type UserAuth = {
-    id: number
+    id: string
     name: string
     email: string
     score: number
+    type:number
     token: string
 }

@@ -114,7 +114,7 @@ export default {
   methods: {
     async fetchBoulders() {
       try {
-        const response = await axios.get(`${this.url}/boulders/`)
+        const response = await axios.get(`${this.url}/boulders/`) // CHAMADA DEVERIA SER CACHEADA ?
         this.boulders = response.data.boulders
       } catch (err) {
         if (axios.isAxiosError(err)) {
@@ -145,13 +145,11 @@ export default {
       }
 
       try {
-        const user = await axios.post(`${this.url}/ascents/create`, data, {
+        await axios.post(`${this.url}/ascents/create`, data, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         })
-
-        localStorage.setItem('user', JSON.stringify(user.data))
 
         this.$emit('success', {
           success: true,

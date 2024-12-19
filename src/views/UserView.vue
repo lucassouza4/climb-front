@@ -18,6 +18,7 @@ export default {
     return {
       qntBoulders: 0,
       user: null as User | null,
+      bouldersByDifficulty: {} as { [key: number]: number },
     }
   },
   mounted() {
@@ -32,6 +33,7 @@ export default {
         const user = JSON.parse(storedUser) as User
         try {
           const response = await axios.get(`${this.url}/user`, {
+            // DEVERIA CHAMAR SEMPRE ? OU SÓ QUANDO TIVER ALGUMA ATUALIZAÇÃO
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
@@ -40,12 +42,16 @@ export default {
             },
           })
           this.user = response.data
+          localStorage.setItem('user', JSON.stringify(response.data))
         } finally {
         }
       }
     },
     handleQntboulders(len: number) {
       this.qntBoulders = len
+    },
+    handleBouldersByDifficulty(difficulties: { [key: number]: number }) {
+      this.bouldersByDifficulty = difficulties
     },
   },
   components: {
@@ -59,8 +65,12 @@ export default {
 <template>
   <UserProgress :len="qntBoulders" :score="user ? user.score : 0" />
   <div class="userInfo">
-    <UserInfo />
-    <UserBoulderList :url="url" @qntBoulders="handleQntboulders" />
+    <UserInfo :bouldersByDifficulty="bouldersByDifficulty" />
+    <UserBoulderList
+      :url="url"
+      @qntBoulders="handleQntboulders"
+      @bouldersByDifficulty="handleBouldersByDifficulty"
+    />
   </div>
 </template>
 

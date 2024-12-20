@@ -1,13 +1,16 @@
 <script lang="ts">
+import RankingList from '@/components/RankingList.vue'
+
 export default {
   name: 'RankingView',
+  components: {
+    RankingList,
+  },
 }
 </script>
 
 <template>
-  <div class="alert">
-    <h1>EM BREVE</h1>
-  </div>
+  <RankingList />
 </template>
 
 <style scoped>

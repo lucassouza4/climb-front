@@ -1,19 +1,24 @@
 <script lang="ts">
+import ClimbersList from '@/components/ClimbersList.vue'
+
 export default {
   name: 'ClimbersView',
+  props: {
+    url: {
+      type: String,
+      required: true,
+    },
+  },
+  components: {
+    ClimbersList,
+  },
 }
 </script>
 
 <template>
-  <div class="alert">
-    <h1>EM BREVE</h1>
+  <div>
+    <ClimbersList :url="url" />
   </div>
 </template>
 
-<style scoped>
-.alert {
-  padding: 2rem;
-  display: flex;
-  justify-content: center;
-}
-</style>
+<style scoped></style>

@@ -17,7 +17,7 @@ export default defineComponent({
   data() {
     return {
       qntBoulders: 0,
-      user: null as User | null,
+      user: {} as User,
       bouldersByDifficulty: {} as { [key: number]: number },
     }
   },
@@ -63,7 +63,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <UserProgress :len="qntBoulders" :score="user ? user.score : 0" />
+  <UserProgress :len="qntBoulders" :user="user" />
   <div class="userInfo">
     <UserInfo :bouldersByDifficulty="bouldersByDifficulty" />
     <UserBoulderList

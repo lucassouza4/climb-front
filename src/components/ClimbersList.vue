@@ -70,9 +70,13 @@
               <tbody>
                 <tr v-for="(climber, index) in filteredClimbers" :key="index">
                   <td>{{ climber.name }}</td>
-                  <td>{{ climber.type }}</td>
+                  <td>
+                    <span :class="getTypeClass(climber.type)">
+                      {{ getTypeName(climber.type) }}
+                    </span>
+                  </td>
                   <td>{{ climber.score }}</td>
-                  <td>-</td>
+                  <td>{{ climber.rank }}</td>
                   <td class="botao-acao">
                     <button
                       type="button"
@@ -101,6 +105,7 @@
 </template>
 
 <script lang="ts">
+import { Type } from '@/enums/user'
 import type { User } from '@/types/user'
 import axios from 'axios'
 import { defineComponent } from 'vue'
@@ -146,6 +151,17 @@ export default defineComponent({
         this.loading = false
       }
     },
+    getTypeName(type: number): string {
+      return Type[type]
+    },
+    getTypeClass(type: Type): string {
+      switch (type) {
+        case Type.BASIC:
+          return 'user-type-basic'
+        case Type.MASTER:
+          return 'user-type-master'
+      }
+    },
     sortedClimbers() {
       return this.climbers.sort((a, b) => b.score - a.score)
     },
@@ -186,5 +202,25 @@ export default defineComponent({
   color: #495057;
   background-color: #e9ecef;
   border-color: #dee2e6 #dee2e6 #fff;
+}
+.user-type-basic {
+  background-color: blue; /* Fundo azul */
+  color: white; /* Texto branco */
+  padding: 4px 12px;
+  border-radius: 20px;
+  width: 50px;
+  font-size: 0.5rem;
+  display: flex;
+  justify-content: center;
+}
+.user-type-master {
+  background-color: purple; /* Fundo roxo */
+  color: white; /* Texto branco */
+  padding: 4px 12px;
+  width: 50px;
+  border-radius: 20px;
+  font-size: 0.5rem;
+  display: flex;
+  justify-content: center;
 }
 </style>

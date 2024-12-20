@@ -3,12 +3,12 @@
     <div class="card-body">
       <div class="info">
         <h3>SCORE</h3>
-        <h4 class="text-muted">{{ score }}</h4>
+        <h4 class="text-muted">{{ user.score }}</h4>
       </div>
       |
       <div class="info">
         <h3>RANK</h3>
-        <h4 class="text-muted">-</h4>
+        <h4 class="text-muted">{{ user.rank }}</h4>
       </div>
       |
       <div class="info">
@@ -25,6 +25,8 @@
 </template>
 
 <script lang="ts">
+import type { User } from '@/types/user'
+
 export default {
   name: 'UserProgress',
   props: {
@@ -32,8 +34,8 @@ export default {
       type: Number,
       required: true,
     },
-    score: {
-      type: Number,
+    user: {
+      type: Object as () => User,
       required: true,
     },
   },

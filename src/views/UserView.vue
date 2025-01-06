@@ -33,7 +33,6 @@ export default defineComponent({
         const user = JSON.parse(storedUser) as User
         try {
           const response = await axios.get(`${this.url}/user`, {
-            // DEVERIA CHAMAR SEMPRE ? OU SÓ QUANDO TIVER ALGUMA ATUALIZAÇÃO
             headers: {
               Authorization: `Bearer ${localStorage.getItem('token')}`,
             },
@@ -78,6 +77,15 @@ export default defineComponent({
 .userInfo {
   padding: 2rem;
   display: flex;
-  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .userInfo {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
 }
 </style>

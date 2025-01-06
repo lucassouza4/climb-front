@@ -6,7 +6,7 @@ export type User = {
     email: string
     score:number
     type:Type
-    rank:number
+    rank?:number
 }
 
 export type UserAuth = {

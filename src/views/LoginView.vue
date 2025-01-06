@@ -47,8 +47,31 @@ export default {
 <style scoped>
 .login-form {
   display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  margin: 2rem;
+}
+
+@media (max-width: 768px) {
+  .login-form {
+    padding: 1rem;
+  }
+
+  .login-form > * {
+    flex: 1 1 100%;
+  }
+}
+
+.alert {
+  margin: 1rem;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .alert {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
 }
 </style>

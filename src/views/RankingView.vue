@@ -3,6 +3,12 @@ import RankingList from '@/components/RankingList.vue'
 
 export default {
   name: 'RankingView',
+  props: {
+    url: {
+      type: String,
+      required: true,
+    },
+  },
   components: {
     RankingList,
   },
@@ -10,7 +16,7 @@ export default {
 </script>
 
 <template>
-  <RankingList />
+  <RankingList :url="url" />
 </template>
 
 <style scoped>

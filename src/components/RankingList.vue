@@ -67,23 +67,13 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(climber, index) in searchClimbers" :key="index">
+                <tr v-for="(climber, index) in filteredRank" :key="index">
                   <td>{{ index + 1 }}</td>
                   <td>{{ climber.name }}</td>
                   <td>{{ climber.score }}</td>
                   <td class="botao-acao">
-                    <button
-                      type="button"
-                      class="table-button btn btn-outline-info"
-                      @click="verPerfil(climber)"
-                    >
-                      Perfil
-                    </button>
-                    <button
-                      type="button"
-                      class="table-button btn btn-outline-success"
-                      @click="verPerfil(climber)"
-                    >
+                    <button type="button" class="table-button btn btn-outline-info">Perfil</button>
+                    <button type="button" class="table-button btn btn-outline-success">
                       Adicionar
                     </button>
                   </td>
@@ -127,7 +117,7 @@ export default defineComponent({
     }
   },
   computed: {
-    searchClimbers() {
+    filteredRank() {
       return this.ranking.filter((user) =>
         user.name.toLowerCase().includes(this.searchQuery.toLowerCase()),
       )
@@ -148,7 +138,9 @@ export default defineComponent({
     async setActiveTab(tab: string) {
       this.activeTab = tab
     },
-    verPerfil(climber: Ranking) {},
+    searchClimbers() {
+      //logica da busca
+    },
   },
   async mounted() {
     await this.fetchRank()

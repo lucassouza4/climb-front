@@ -103,5 +103,6 @@ export default {
   align-content: center;
   box-shadow: 0px 5px 5px 5px rgba(0, 0, 0, 0.2);
   border-radius: 2%;
+  margin: 1.5rem;
 }
 </style>

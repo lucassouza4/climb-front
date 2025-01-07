@@ -21,6 +21,14 @@
                 >
                   Filtro
                 </button>
+                <button
+                  v-if="hasPermissionToAlter"
+                  type="button"
+                  class="table-button btn btn-outline-warning my-2 my-sm-0 btn-lg"
+                  @click="showCreateModal()"
+                >
+                  Adicionar
+                </button>
                 <div id="dropdown-menu" class="dropdown-menu">
                   <a class="dropdown-item" href="#" @click="selectItem('Nome')">Nome</a>
                   <a class="dropdown-item" href="#" @click="selectItem('Cidade')">Cidade</a>
@@ -54,7 +62,13 @@
                 <th scope="col">Setor</th>
                 <th scope="col">Dificuldade</th>
                 <th scope="col">Ascensões</th>
-                <th class="texto-acao" scope="col">Ações</th>
+                <th
+                  v-if="hasPermissionToAlter || hasPermissionToInclude"
+                  class="texto-acao"
+                  scope="col"
+                >
+                  Ações
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -65,8 +79,9 @@
                 <td>{{ boulder.sector }}</td>
                 <td>V{{ boulder.difficulty }}</td>
                 <td>{{ boulder.ascents }}</td>
-                <td class="botao-acao">
+                <td v-if="hasPermissionToAlter || hasPermissionToInclude" class="botao-acao">
                   <button
+                    v-if="hasPermissionToInclude"
                     type="button"
                     class="table-button btn btn-outline-info"
                     @click="showInfoModal(boulder)"
@@ -74,7 +89,7 @@
                     Info
                   </button>
                   <button
-                    v-if="hasPermission"
+                    v-if="hasPermissionToAlter"
                     type="button"
                     class="table-button btn btn-outline-warning"
                     @click="showEditModal(boulder)"
@@ -109,6 +124,15 @@
       @close="hideEditModal"
       @success="handleSuccess"
     />
+
+    <BoulderCreateModal
+      v-if="isModalCreateVisible"
+      :user="user"
+      :isVisible="isModalCreateVisible"
+      :url="url"
+      @close="hideCreateModal"
+      @success="handleSuccess"
+    />
   </div>
 </template>
 
@@ -122,12 +146,14 @@ import { defineComponent } from 'vue'
 import { Permissions } from '@/enums/user'
 import type { TokenPayload } from '@/types/tokenPayload'
 import BoulderEditModal from './BoulderEditModal.vue'
+import BoulderCreateModal from './BoulderCreateModal.vue'
 
 export default defineComponent({
   name: 'BoulderList',
   components: {
     BoulderInfoModal,
     BoulderEditModal,
+    BoulderCreateModal,
   },
   props: {
     url: {
@@ -144,6 +170,7 @@ export default defineComponent({
       loading: true,
       isModalInfoVisible: false,
       isModalEditVisible: false,
+      isModalCreateVisible: false,
       selectedFilter: '',
       searchQuery: '',
       error: '',
@@ -174,8 +201,11 @@ export default defineComponent({
           )
       }
     },
-    hasPermission() {
-      return this.permissions.includes(Permissions.UPDATE_BOULDER)
+    hasPermissionToAlter() {
+      return this.permissions.includes(Permissions.UPDATE_BOULDER, Permissions.CREATE_BOULDER)
+    },
+    hasPermissionToInclude() {
+      return this.permissions.includes(Permissions.READ_BOULDER)
     },
   },
   methods: {
@@ -203,16 +233,22 @@ export default defineComponent({
       this.selectedBoulder = boulder
       this.isModalEditVisible = true
     },
+    showCreateModal() {
+      this.isModalCreateVisible = true
+    },
     hideInfoModal() {
       this.isModalInfoVisible = false
     },
     hideEditModal() {
       this.isModalEditVisible = false
     },
+    hideCreateModal() {
+      this.isModalCreateVisible = false
+    },
     searchBoulders() {
       // Logic for search can be extended here if needed
     },
-    handleSuccess(event: { success: boolean; message: string }) {
+    handleSuccess(event: { success: boolean; message: string; boulder?: Boulder }) {
       this.$emit('success', event)
 
       if (event.success) {
@@ -222,6 +258,9 @@ export default defineComponent({
         if (updatedBoulder) {
           updatedBoulder.ascents += 1
           this.sortedBoulders()
+        }
+        if (event.boulder) {
+          this.boulders.unshift(event.boulder)
         }
       }
     },

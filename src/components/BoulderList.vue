@@ -202,7 +202,7 @@ export default defineComponent({
       }
     },
     hasPermissionToAlter() {
-      return this.permissions.includes(Permissions.UPDATE_BOULDER, Permissions.CREATE_BOULDER)
+      return this.permissions.includes(Permissions.UPDATE_BOULDER)
     },
     hasPermissionToInclude() {
       return this.permissions.includes(Permissions.READ_BOULDER)

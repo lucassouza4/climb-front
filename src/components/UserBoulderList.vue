@@ -203,4 +203,8 @@ export default defineComponent({
 .modal {
   background-color: rgba(0, 0, 0, 0.5);
 }
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
 </style>

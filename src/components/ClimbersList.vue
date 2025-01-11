@@ -223,4 +223,9 @@ export default defineComponent({
   display: flex;
   justify-content: center;
 }
+
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
 </style>

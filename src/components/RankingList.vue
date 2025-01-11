@@ -193,4 +193,9 @@ export default defineComponent({
 .table-button {
   margin-inline: 10px;
 }
+
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto;
+}
 </style>

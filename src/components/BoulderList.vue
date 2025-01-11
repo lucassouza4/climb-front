@@ -314,6 +314,12 @@ export default defineComponent({
 .table-button {
   margin: 1rem;
 }
+
+.table-responsive {
+  max-height: 400px;
+  overflow-y: auto; /* Adicione scroll vertical */
+}
+
 .texto-acao {
   text-align: center;
 }

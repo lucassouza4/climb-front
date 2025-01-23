@@ -132,10 +132,10 @@ export default defineComponent({
           <table class="table table-striped">
             <thead>
               <tr>
-                <th scope="col">Name</th>
-                <th scope="col">City</th>
-                <th scope="col">Sector</th>
-                <th scope="col">Difficulty</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Cidade</th>
+                <th scope="col">Setor</th>
+                <th scope="col">Dificuldade</th>
                 <th scope="col"></th>
               </tr>
             </thead>

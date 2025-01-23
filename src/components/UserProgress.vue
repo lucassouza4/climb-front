@@ -2,12 +2,12 @@
   <div class="card">
     <div class="card-body">
       <div class="info">
-        <h3>SCORE</h3>
+        <h3>PONTUAÇÃO</h3>
         <h4 class="text-muted">{{ user.score }}</h4>
       </div>
       <span class="divider">|</span>
       <div class="info">
-        <h3>RANK</h3>
+        <h3>RANKING</h3>
         <h4 class="text-muted">{{ user.rank }}</h4>
       </div>
       <span class="divider">|</span>

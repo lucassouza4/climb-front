@@ -22,6 +22,7 @@ export default defineComponent({
       user: {} as User,
       bouldersByDifficulty: {} as { [key: number]: number },
       friendshipTabs: [TabProps.FRIENDS, TabProps.PENDING],
+      addFriendshipSuccess: {} as { success: boolean; message: string },
     }
   },
   mounted() {
@@ -30,8 +31,15 @@ export default defineComponent({
     watch(() => this.qntBoulders, this.fetchUser)
   },
   methods: {
+    handleSuccess(data: { success: boolean; message: string }) {
+      this.addFriendshipSuccess = data
+    },
     getUser() {
-      return localStorage.getItem('user') as unknown as User
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        return JSON.parse(storedUser) as User
+      }
+      return null
     },
     async fetchUser() {
       const storedUser = localStorage.getItem('user')
@@ -69,6 +77,12 @@ export default defineComponent({
 </script>
 
 <template>
+  <div v-if="addFriendshipSuccess?.success === true" class="alert alert-success" role="alert">
+    {{ addFriendshipSuccess.message }}
+  </div>
+  <div v-if="addFriendshipSuccess?.success === false" class="alert alert-danger" role="alert">
+    {{ addFriendshipSuccess.message }}
+  </div>
   <UserProgress :len="qntBoulders" :user="user" />
   <div class="userInfo">
     <UserInfo :bouldersByDifficulty="bouldersByDifficulty" />
@@ -78,7 +92,13 @@ export default defineComponent({
       @bouldersByDifficulty="handleBouldersByDifficulty"
     />
   </div>
-  <ClimbersList :url="url" title="Lista de amigos" :tabs="friendshipTabs" :user="getUser" />
+  <ClimbersList
+    :url="url"
+    title="Lista de amigos"
+    :tabs="friendshipTabs"
+    :user="getUser()"
+    @success="handleSuccess"
+  />
 </template>
 
 <style scoped>

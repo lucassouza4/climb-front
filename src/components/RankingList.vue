@@ -73,9 +73,6 @@
                   <td>{{ climber.score }}</td>
                   <td class="botao-acao">
                     <button type="button" class="table-button btn btn-outline-info">Perfil</button>
-                    <button type="button" class="table-button btn btn-outline-success">
-                      Adicionar
-                    </button>
                   </td>
                 </tr>
               </tbody>

@@ -88,7 +88,13 @@
               </thead>
               <tbody>
                 <tr v-for="(friend, index) in filteredFriends" :key="index">
-                  <td>{{ friend.addresseeName }}</td>
+                  <td>
+                    {{
+                      friend.requesterName === user?.name
+                        ? friend.addresseeName
+                        : friend.requesterName
+                    }}
+                  </td>
                   <td class="botao-acao">
                     <button
                       type="button"
@@ -123,13 +129,14 @@
                 <tr v-for="(friend, index) in filteredFriendRequest" :key="index">
                   <td>
                     {{
-                      friend.addresseeName === user?.name
-                        ? friend.requesterName
-                        : friend.addresseeName
+                      friend.requesterName === user?.name
+                        ? friend.addresseeName
+                        : friend.requesterName
                     }}
                   </td>
                   <td class="botao-acao">
                     <button
+                      v-bind:disabled="canAcept(friend)"
                       type="button"
                       class="table-button btn btn-outline-success"
                       @click="aceptFriendship(friend.id)"
@@ -212,23 +219,26 @@ export default defineComponent({
     },
   },
   methods: {
+    canAcept(friend: Friendship) {
+      if (friend.addresseeName === this.user?.name) {
+        return false
+      }
+      return true
+    },
     canRequest(climber: User) {
-      if (
-        climber.id === this.user?.id ||
-        this.friendship.findIndex(
-          (c) => c.addresseeName === climber.name || c.requesterName == climber.name,
-        ) + 1
-      ) {
+      if (climber.id === this.user?.id) {
         return true
       }
-      return false
+      return this.friendship.some(
+        (friend) => friend.addresseeName === climber.name || friend.requesterName === climber.name,
+      )
     },
     getActive() {
       return this.tabs[0]
     },
     async fetch() {
       if (this.tabs.includes(TabProps.USERS)) await this.fetchUsers()
-      if (this.tabs.includes(TabProps.FRIENDS)) await this.fetchFriends()
+      await this.fetchFriends()
     },
     async fetchUsers() {
       try {
@@ -238,7 +248,6 @@ export default defineComponent({
           },
         })
         this.climbers = response.data.users
-        this.sortedClimbers()
       } catch {
         this.error = 'An error occurred while fetching boulders.'
       } finally {
@@ -278,9 +287,6 @@ export default defineComponent({
           return 'user-type-master'
       }
     },
-    sortedClimbers() {
-      return this.climbers.sort((a, b) => b.score - a.score)
-    },
     async addClimber(climber: User) {
       const data = {
         requesterId: this.user?.id,
@@ -293,8 +299,14 @@ export default defineComponent({
           },
         })
         this.friendship.push(response.data.friendships[0])
-      } catch {
-        this.error = 'An error occurred while fetching boulders.'
+        this.$emit('success', {
+          success: true,
+          message: 'Pedido de amizade enviado com sucesso!',
+        })
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          this.$emit('success', { success: false, message: error.response?.data })
+        }
       } finally {
         this.loading = false
       }
@@ -311,8 +323,14 @@ export default defineComponent({
         })
         const updatedFriendship = this.friendship.filter((friend) => friend.id != id)
         this.friendship = updatedFriendship
-      } catch {
-        this.error = 'An error occurred while fetching boulders.'
+        this.$emit('success', {
+          success: true,
+          message: 'Amizade removida com sucesso!',
+        })
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          this.$emit('success', { success: false, message: error.response?.data })
+        }
       } finally {
         this.loading = false
       }
@@ -334,8 +352,14 @@ export default defineComponent({
           friend.id === id ? { ...friend, status: Status.ACCEPTED } : friend,
         )
         this.friendship = updatedFriendship
-      } catch {
-        this.error = 'An error occurred while fetching boulders.'
+        this.$emit('success', {
+          success: true,
+          message: 'Pedido de amizade aceito com sucesso!',
+        })
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          this.$emit('success', { success: false, message: error.response?.data })
+        }
       } finally {
         this.loading = false
       }

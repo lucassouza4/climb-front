@@ -1,7 +1,9 @@
 <script lang="ts">
+import ClimbersList from '@/components/ClimbersList.vue'
 import UserBoulderList from '@/components/UserBoulderList.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import UserProgress from '@/components/UserProgress.vue'
+import { TabProps } from '@/enums/climbersTab'
 import type { User } from '@/types/user'
 import axios from 'axios'
 import { defineComponent, watch } from 'vue'
@@ -19,6 +21,8 @@ export default defineComponent({
       qntBoulders: 0,
       user: {} as User,
       bouldersByDifficulty: {} as { [key: number]: number },
+      friendshipTabs: [TabProps.FRIENDS, TabProps.PENDING],
+      addFriendshipSuccess: {} as { success: boolean; message: string },
     }
   },
   mounted() {
@@ -27,6 +31,16 @@ export default defineComponent({
     watch(() => this.qntBoulders, this.fetchUser)
   },
   methods: {
+    handleSuccess(data: { success: boolean; message: string }) {
+      this.addFriendshipSuccess = data
+    },
+    getUser() {
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        return JSON.parse(storedUser) as User
+      }
+      return null
+    },
     async fetchUser() {
       const storedUser = localStorage.getItem('user')
       if (storedUser) {
@@ -57,11 +71,18 @@ export default defineComponent({
     UserInfo,
     UserProgress,
     UserBoulderList,
+    ClimbersList,
   },
 })
 </script>
 
 <template>
+  <div v-if="addFriendshipSuccess?.success === true" class="alert alert-success" role="alert">
+    {{ addFriendshipSuccess.message }}
+  </div>
+  <div v-if="addFriendshipSuccess?.success === false" class="alert alert-danger" role="alert">
+    {{ addFriendshipSuccess.message }}
+  </div>
   <UserProgress :len="qntBoulders" :user="user" />
   <div class="userInfo">
     <UserInfo :bouldersByDifficulty="bouldersByDifficulty" />
@@ -71,6 +92,13 @@ export default defineComponent({
       @bouldersByDifficulty="handleBouldersByDifficulty"
     />
   </div>
+  <ClimbersList
+    :url="url"
+    title="Lista de amigos"
+    :tabs="friendshipTabs"
+    :user="getUser()"
+    @success="handleSuccess"
+  />
 </template>
 
 <style scoped>

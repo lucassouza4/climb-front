@@ -1,7 +1,9 @@
 <script lang="ts">
+import ClimbersList from '@/components/ClimbersList.vue'
 import UserBoulderList from '@/components/UserBoulderList.vue'
 import UserInfo from '@/components/UserInfo.vue'
 import UserProgress from '@/components/UserProgress.vue'
+import { TabProps } from '@/enums/climbersTab'
 import type { User } from '@/types/user'
 import axios from 'axios'
 import { defineComponent, watch } from 'vue'
@@ -19,6 +21,7 @@ export default defineComponent({
       qntBoulders: 0,
       user: {} as User,
       bouldersByDifficulty: {} as { [key: number]: number },
+      friendshipTabs: [TabProps.FRIENDS, TabProps.PENDING],
     }
   },
   mounted() {
@@ -27,6 +30,9 @@ export default defineComponent({
     watch(() => this.qntBoulders, this.fetchUser)
   },
   methods: {
+    getUser() {
+      return localStorage.getItem('user') as unknown as User
+    },
     async fetchUser() {
       const storedUser = localStorage.getItem('user')
       if (storedUser) {
@@ -57,6 +63,7 @@ export default defineComponent({
     UserInfo,
     UserProgress,
     UserBoulderList,
+    ClimbersList,
   },
 })
 </script>
@@ -71,6 +78,7 @@ export default defineComponent({
       @bouldersByDifficulty="handleBouldersByDifficulty"
     />
   </div>
+  <ClimbersList :url="url" title="Lista de amigos" :tabs="friendshipTabs" :user="getUser" />
 </template>
 
 <style scoped>

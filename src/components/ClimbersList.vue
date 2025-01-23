@@ -2,7 +2,7 @@
   <div class="container-fluid bg-light py-4">
     <div class="row justify-content-center">
       <div class="col-12 col-lg-10">
-        <h1 class="h3 mb-4">Escaladores</h1>
+        <h1 class="h3 mb-4">{{ title }}</h1>
         <nav class="navbar navbar-light bg-light">
           <form class="form-inline" @submit.prevent="searchClimbers">
             <div class="input-group">
@@ -19,37 +19,15 @@
         </nav>
         <!-- Nav Tabs -->
         <ul class="nav nav-tabs">
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              :class="{ active: activeTab === 'users' }"
-              @click="setActiveTab('users')"
-            >
-              Usuários
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              :class="{ active: activeTab === 'friends' }"
-              @click="setActiveTab('friends')"
-            >
-              Amigos
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link"
-              :class="{ active: activeTab === 'pending' }"
-              @click="setActiveTab('pending')"
-            >
-              Pedidos pendentes
+          <li v-for="tab in tabs" v-bind:key="tab.indexOf(tab)" class="nav-item">
+            <a class="nav-link" :class="{ active: activeTab === tab }" @click="setActiveTab(tab)">
+              {{ tab }}
             </a>
           </li>
         </ul>
 
         <!-- Tab Content -->
-        <div v-if="activeTab === 'users'">
+        <div v-if="activeTab === TabProps.USERS">
           <div v-if="loading" class="text-center py-4">
             <p class="text-muted">Carregando escaladores...</p>
           </div>
@@ -79,6 +57,7 @@
                   <td>{{ climber.rank }}</td>
                   <td class="botao-acao">
                     <button
+                      v-bind:disabled="canRequest(climber)"
                       type="button"
                       class="table-button btn btn-outline-success"
                       @click="addClimber(climber)"
@@ -92,12 +71,76 @@
           </div>
         </div>
 
-        <div v-if="activeTab === 'friends'">
-          <p class="text-muted text-center mt-4">Lista de amigos em construção.</p>
+        <div v-if="activeTab === TabProps.FRIENDS">
+          <div v-if="loading" class="text-center py-4">
+            <p class="text-muted">Carregando escaladores...</p>
+          </div>
+          <div v-else-if="error" class="text-center py-4">
+            <p class="text-danger">{{ error }}</p>
+          </div>
+          <div v-else class="table-responsive mt-3">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Nome</th>
+                  <th class="texto-acao" scope="col">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(friend, index) in filteredFriends" :key="index">
+                  <td>{{ friend.addresseeName }}</td>
+                  <td class="botao-acao">
+                    <button
+                      type="button"
+                      class="table-button btn btn-outline-danger"
+                      @click="removeFriendship(friend.id)"
+                    >
+                      Remover
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div v-if="activeTab === 'pending'">
-          <p class="text-muted text-center mt-4">Lista de pedidos pendentes em construção.</p>
+        <div v-if="activeTab === TabProps.PENDING">
+          <div v-if="loading" class="text-center py-4">
+            <p class="text-muted">Carregando escaladores...</p>
+          </div>
+          <div v-else-if="error" class="text-center py-4">
+            <p class="text-danger">{{ error }}</p>
+          </div>
+          <div v-else class="table-responsive mt-3">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Nome</th>
+                  <th class="texto-acao" scope="col">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(friend, index) in filteredFriendRequest" :key="index">
+                  <td>
+                    {{
+                      friend.addresseeName === user?.name
+                        ? friend.requesterName
+                        : friend.addresseeName
+                    }}
+                  </td>
+                  <td class="botao-acao">
+                    <button
+                      type="button"
+                      class="table-button btn btn-outline-success"
+                      @click="aceptFriendship(friend.id)"
+                    >
+                      Aceitar
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -105,7 +148,10 @@
 </template>
 
 <script lang="ts">
+import { TabProps } from '@/enums/climbersTab'
+import { Status } from '@/enums/friendship'
 import { Type } from '@/enums/user'
+import type { Friendship } from '@/types/friendship'
 import type { User } from '@/types/user'
 import axios from 'axios'
 import { defineComponent } from 'vue'
@@ -117,25 +163,73 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    title: {
+      type: String,
+      required: true,
+    },
+    tabs: {
+      type: Array as () => TabProps[],
+      required: true,
+    },
+    user: {
+      type: Object as () => User | null,
+      required: true,
+    },
   },
   data() {
     return {
       climbers: [] as User[],
+      friendship: [] as Friendship[],
       searchQuery: '',
       selectedFilter: '',
       error: '',
-      activeTab: 'users',
+      activeTab: this.getActive(),
       loading: true,
     }
   },
   computed: {
+    TabProps() {
+      return TabProps
+    },
     filteredClimbers() {
       return this.climbers.filter((climber) =>
         climber.name.toLowerCase().includes(this.searchQuery.toLowerCase()),
       )
     },
+    filteredFriends() {
+      return this.friendship.filter(
+        (friend) =>
+          friend.addresseeName.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
+          friend.status === Status.ACCEPTED,
+      )
+    },
+    filteredFriendRequest() {
+      return this.friendship.filter(
+        (friend) =>
+          friend.addresseeName.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
+          friend.status === Status.PENDING,
+      )
+    },
   },
   methods: {
+    canRequest(climber: User) {
+      if (
+        climber.id === this.user?.id ||
+        this.friendship.findIndex(
+          (c) => c.addresseeName === climber.name || c.requesterName == climber.name,
+        ) + 1
+      ) {
+        return true
+      }
+      return false
+    },
+    getActive() {
+      return this.tabs[0]
+    },
+    async fetch() {
+      if (this.tabs.includes(TabProps.USERS)) await this.fetchUsers()
+      if (this.tabs.includes(TabProps.FRIENDS)) await this.fetchFriends()
+    },
     async fetchUsers() {
       try {
         const response = await axios.get(`${this.url}/user`, {
@@ -149,6 +243,28 @@ export default defineComponent({
         this.error = 'An error occurred while fetching boulders.'
       } finally {
         this.loading = false
+      }
+    },
+    async fetchFriends() {
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        const user = JSON.parse(storedUser) as User
+
+        try {
+          const response = await axios.get(`${this.url}/friendships`, {
+            headers: {
+              Authorization: localStorage.getItem('token'),
+            },
+            params: {
+              userId: user.id,
+            },
+          })
+          this.friendship = response.data.friendships
+        } catch {
+          this.error = 'An error occurred while fetching boulders.'
+        } finally {
+          this.loading = false
+        }
       }
     },
     getTypeName(type: number): string {
@@ -165,18 +281,75 @@ export default defineComponent({
     sortedClimbers() {
       return this.climbers.sort((a, b) => b.score - a.score)
     },
-    addClimber(climber: User) {
-      console.log(climber)
+    async addClimber(climber: User) {
+      const data = {
+        requesterId: this.user?.id,
+        addresseeId: climber.id,
+      }
+      try {
+        const response = await axios.post(`${this.url}/friendship/create`, data, {
+          headers: {
+            Authorization: localStorage.getItem('token'),
+          },
+        })
+        this.friendship.push(response.data.friendships[0])
+      } catch {
+        this.error = 'An error occurred while fetching boulders.'
+      } finally {
+        this.loading = false
+      }
+    },
+    async removeFriendship(id: string) {
+      try {
+        await axios.delete(`${this.url}/friendships`, {
+          headers: {
+            Authorization: localStorage.getItem('token'),
+          },
+          params: {
+            friendshipId: id,
+          },
+        })
+        const updatedFriendship = this.friendship.filter((friend) => friend.id != id)
+        this.friendship = updatedFriendship
+      } catch {
+        this.error = 'An error occurred while fetching boulders.'
+      } finally {
+        this.loading = false
+      }
+    },
+    async aceptFriendship(id: string) {
+      const data = {
+        status: Status.ACCEPTED,
+      }
+      try {
+        await axios.patch(`${this.url}/friendships`, data, {
+          headers: {
+            Authorization: localStorage.getItem('token'),
+          },
+          params: {
+            friendshipId: id,
+          },
+        })
+        const updatedFriendship = this.friendship.map((friend) =>
+          friend.id === id ? { ...friend, status: Status.ACCEPTED } : friend,
+        )
+        this.friendship = updatedFriendship
+      } catch {
+        this.error = 'An error occurred while fetching boulders.'
+      } finally {
+        this.loading = false
+      }
     },
     searchClimbers() {
       //logica da busca
     },
-    setActiveTab(tab: string) {
+    setActiveTab(tab: TabProps) {
       this.activeTab = tab
     },
   },
   async mounted() {
-    await this.fetchUsers()
+    await this.fetch()
+    this.getActive()
   },
 })
 </script>
